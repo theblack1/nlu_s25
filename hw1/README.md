@@ -64,4 +64,3 @@ Partial credit may be awarded at the TAs' discretion.
 ## Late Submissions and Resubmissions
 
 You may resubmit your solutions as many times as you like; only the final submission will be graded. If the final submission occurs after the deadline on Febuary 7, then your submission will be considered late even if you have previously submitted your solution before the deadline.
-# nlu_s25
