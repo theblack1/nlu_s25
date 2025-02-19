@@ -1,5 +1,5 @@
 # HW 1: Intrinsic Evaluation of Word Embeddings
-**Due: February 28, 9:30 AM**
+**Due: February 27, 5:00 PM**
 
 For this assignment, please complete the _problem set_ found in `hw1-pset.ipynb`. The problem set includes coding problems as well as written problems.
 
