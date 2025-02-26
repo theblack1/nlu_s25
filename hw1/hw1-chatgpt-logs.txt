@@ -1,0 +1,56 @@
+Q：briefly tell me: what is @classmethod in a python class, and what is its different compare to normal method?
+A：In Python, @classmethod is a decorator used to define a class method. A class method receives the class itself (cls) as its first parameter instead of an instance (self), which allows it to access and modify class-level attributes rather than instance-level attributes.
+
+Differences from a Normal Method:
+First Parameter:
+
+Normal Method: Takes self as the first parameter (instance-level).
+Class Method: Takes cls as the first parameter (class-level).
+Access Scope:
+
+Normal Method: Can modify instance attributes and call other instance methods.
+Class Method: Can modify class attributes but cannot access or modify specific instance attributes unless explicitly passed.
+Usage:
+
+Normal Method: Used for operations related to a specific instance.
+Class Method: Used for operations that affect the whole class or create alternative constructors.
+Example:
+class Example:
+    class_attr = "I am a class attribute"
+
+    def normal_method(self):
+        return f"Called from {self}"
+
+    @classmethod
+    def class_method(cls):
+        return f"Class method called from {cls}, class_attr: {cls.class_attr}"
+
+# Usage:
+obj = Example()
+print(obj.normal_method())  # Works on instance
+print(Example.class_method())  # Works on class itself
+In summary, @classmethod allows operations at the class level, while normal methods work on individual instances.
+
+Q：Briefly tell me: How to use np.fromstring?
+A：np.fromstring is a NumPy function used to create a NumPy array from a string containing numerical data. It is useful for parsing text-based numerical data into an array.
+
+Syntax:
+np.fromstring(string, dtype=float, sep=' ')
+Parameters:
+string: The input string containing numeric values.
+dtype: The desired data type of the resulting array (default is float).
+sep: The separator between numbers in the string (default is a space ' ').
+Example Usage:
+import numpy as np
+
+data = "1.2 2.3 3.4 4.5"
+arr = np.fromstring(data, dtype=float, sep=' ')
+print(arr)  # Output: [1.2 2.3 3.4 4.5]
+Important Notes:
+The sep argument must be specified for space-separated strings.
+If sep is an empty string (''), np.fromstring expects binary data instead of text.
+If the string format is incorrect, it may return an empty array.
+Would you like more details or examples?
+
+Q：No, thanks
+A：You're welcome! Let me know if you have any other questions. 
