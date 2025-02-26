@@ -59,7 +59,42 @@ def load_analogies(filename: str) -> AnalogiesDataset:
         format of the data is described in the problem set and in the
         docstring for the AnalogiesDataset type alias
     """
-    raise NotImplementedError("Problem 2b has not been completed yet!")
+    
+    # The keys of the `dict` must exactly match the names of the relation types listed in the `data/analogies.txt` data file. The keys should not include the initial `: ` in the names of the relation types, and they should not contain any leading or trailing whitespace.
+    # Each analogy must be represented as a `tuple` or `list` of exactly 4 strings.
+    # raise NotImplementedError("Problem 2b has not been completed yet!")
+    
+    # initialize
+    analogies_dataset = {} 
+    cur_relation = None
+    
+    with open(filename, 'r') as f:
+        for line in f:
+            line_striped = line.strip()
+            
+            # if line is empty, continue
+            if not line_striped:
+                continue
+            
+            # if line starts with ': ', it is a relation type
+            if line_striped.startswith(':'):
+                cur_relation = line_striped[2:]
+                analogies_dataset[cur_relation] = []
+            else:
+                # the line is an analogy
+                
+                # Since glove dataset only contains lowercase words, we should lowercase the words
+                line_striped = line_striped.lower()
+                
+                # Split the line into words
+                line_striped_split = line_striped.split()
+                # check if the line has 4 words
+                if len(line_striped_split) != 4:
+                    raise ValueError(f"Invalid analogy: {line_striped}")
+                analogy = tuple(line_striped_split)
+                analogies_dataset[cur_relation].append(analogy)
+    
+    return analogies_dataset
 
 
 def run_analogy_test(embeddings: Embeddings, test_data: AnalogiesDataset,
