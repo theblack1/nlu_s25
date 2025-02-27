@@ -54,3 +54,78 @@ Would you like more details or examples?
 
 Q：No, thanks
 A：You're welcome! Let me know if you have any other questions. 
+
+Q：how to use np.argsort?
+A：np.argsort is a NumPy function that returns the indices that would sort an array. It is useful for obtaining the sorting order without actually modifying the original array.
+
+Syntax:
+np.argsort(a, axis=-1, kind='quicksort', order=None)
+Parameters:
+a: The input array.
+axis: Axis along which to sort. Default is -1 (last axis).
+kind: Sorting algorithm ('quicksort', 'mergesort', 'heapsort', 'stable'). Default is 'quicksort'.
+order: Used for sorting structured arrays (not common for basic usage).
+Example Usage:
+import numpy as np
+
+arr = np.array([3, 1, 4, 1, 5, 9, 2])
+sorted_indices = np.argsort(arr)
+print(sorted_indices)  # Output: [1 3 6 0 2 4 5]
+
+# Using the indices to sort the original array
+sorted_arr = arr[sorted_indices]
+print(sorted_arr)  # Output: [1 1 2 3 4 5 9]
+Sorting Along Different Axes (for 2D Arrays)
+matrix = np.array([[3, 1, 2], [6, 4, 5]])
+sorted_indices_axis1 = np.argsort(matrix, axis=1)  # Sort along rows
+print(sorted_indices_axis1)
+# Output: [[1 2 0]
+#          [1 2 0]]
+Use Cases:
+Ranking elements.
+Sorting while keeping track of original indices.
+Sorting multi-dimensional arrays along a specific axis.
+Would you like more advanced examples? 
+
+Q：what is np.argpartition? is it the same as np.argsort
+A：np.argpartition vs. np.argsort
+Both np.argpartition and np.argsort return indices that can be used to sort an array, but they work differently.
+
+1. np.argpartition (Partial Sorting)
+Faster than np.argsort when you only need the top/bottom k elements.
+Returns indices that would partition the array such that the k-th element is in its sorted position.
+The elements before and after the k-th element are not fully sorted.
+Syntax:
+np.argpartition(a, kth, axis=-1, kind='introselect', order=None)
+Example:
+import numpy as np
+
+arr = np.array([7, 2, 5, 3, 8, 1])
+k = 2
+indices = np.argpartition(arr, k)
+print(indices)  
+# Output: [5 1 3 2 8 7] (varies, but 2nd smallest is at correct position)
+
+# Extract the k smallest elements in sorted order
+sorted_k_elements = arr[indices[:k]]
+print(sorted_k_elements)  # Example Output: [1, 2] (not necessarily sorted)
+2. np.argsort (Full Sorting)
+Returns indices that fully sort the array.
+Slower than np.argpartition when only the top-k elements are needed.
+Example:
+sorted_indices = np.argsort(arr)
+print(sorted_indices)  
+# Output: [5 1 3 2 0 4]  (fully sorted order)
+
+sorted_arr = arr[sorted_indices]
+print(sorted_arr)  
+# Output: [1 2 3 5 7 8] (fully sorted)
+Key Differences:
+Feature	np.argpartition	np.argsort
+Speed (for k elements)	Faster	Slower
+Full Sorting	No	Yes
+Use Case	Top-k elements	Complete sorting
+When to Use Which?
+Use np.argpartition when you only need the smallest or largest k elements.
+Use np.argsort when you need a fully sorted array.
+Would you like more advanced examples?

@@ -19,7 +19,21 @@ def cosine_sim(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     :return: An array of shape (m, n), where the entry in row i and
         column j is the cosine similarity between x[i] and y[j]
     """
-    raise NotImplementedError("Problem 3b has not been completed yet!")
+    # cosine similarity is the dot product of u and v when they are normalized to unit length
+    # raise NotImplementedError("Problem 3b has not been completed yet!")
+    # Hint: `cosine_sim` can be implemented in **at most 9 lines of code**. The performance of your code may suffer if it is substantially longer than this!
+    
+    # Calculate the L2 norm of each row in x and y
+    x_norm = np.linalg.norm(x, axis=1, keepdims=True)#(m, 1)
+    y_norm = np.linalg.norm(y, axis=1, keepdims=True)#(n, 1)
+
+    # Normalize x and y
+    x_normalized = x/(x_norm)
+    y_normalized = y/(y_norm)
+
+    # dot product of x and y
+    return np.dot(x_normalized, y_normalized.T)  # (m, n)
+    
 
 
 def get_closest_words(embeddings: Embeddings, vectors: np.ndarray,
@@ -37,8 +51,16 @@ def get_closest_words(embeddings: Embeddings, vectors: np.ndarray,
         k words that are closest to vectors[i] in the embedding space,
         not necessarily in order
     """
-    raise NotImplementedError("Problem 3c has not been completed yet!")
-
+    # Hint: implemented in **at most 3 lines of code**.
+    # Hint: You can make your code run faster if you don't try to return the closest words in order (though the difference in performance may not be noticeable since we are using a small number of embeddings).
+    # raise NotImplementedError("Problem 3c has not been completed yet!")
+    
+    # Compute the cosine similarity between the vectors and the embeddings 
+    # then get the indices of the top k closest words for each vector
+    # closest_indices = np.argpartition(cosine_sim(vectors, embeddings.vectors), -k, axis=1)[:, -k:]
+    closest_indices = np.argpartition(-cosine_sim(vectors, embeddings.vectors), k, axis=1)[:, :k]
+    # Return the closest words
+    return [[embeddings.words[i] for i in indices] for indices in closest_indices]
 
 # This type alias represents the format that the testing data should be
 # deserialized into. An analogy is a tuple of 4 strings, and an
@@ -115,4 +137,39 @@ def run_analogy_test(embeddings: Embeddings, test_data: AnalogiesDataset,
         that maps each relation type to the analogy question accuracy
         attained by embeddings on analogies from that relation type
     """
-    raise NotImplementedError("Problem 3d has not been completed yet!")
+    # Hint: implemented in **at most 9 lines of code**
+    # raise NotImplementedError("Problem 3d has not been completed yet!")
+    
+    analogy_test_results = {}
+    # iterate over the relation types
+    for relation, analogies in test_data.items():
+        # iterate over the analogies
+        # cur_correct = 0
+        # for analogie in analogies:
+        #     # get the vectors for the words in the analogy
+        #     input_vector = embeddings[[analogie[2]]] - embeddings[[analogie[0]]] + embeddings[[analogie[1]]]
+            
+        #     # get the closest words for the vector
+        #     closest_words = get_closest_words(embeddings, input_vector, k)
+        
+        #     # check if the last word in the analogy is in the closest words
+        #     if analogie[3] in closest_words[0]:
+        #         cur_correct += 1
+        
+        # # calculate the accuracy
+        # analogy_test_results[relation] = cur_correct / len(analogies)
+
+        # transform to array
+        analogies_arr = np.array(analogies) # (N, 4)
+        
+        # get the vectors for the words in the analogys
+        # analogies_arr[:,2] (N)
+        input_vectors = embeddings[analogies_arr[:,2]] - embeddings[analogies_arr[:,0]] + embeddings[analogies_arr[:,1]] # (N, embedding_size)
+        
+        # get the closest words for the vectors
+        closest_words = get_closest_words(embeddings, input_vectors, k) # (N, k)
+        
+        # check if the last word in the analogy is in the closest words
+        analogy_test_results[relation] = sum([1 if analogies_arr[i,3] in closest_words[i] else 0 for i in range(len(analogies))])/len(analogies)
+                
+    return analogy_test_results
