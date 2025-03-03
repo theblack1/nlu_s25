@@ -1,6 +1,6 @@
 # HW 2: Efficient Fine-Tuning with BitFit?
 
-**Due: March 14, 11:30 AM **
+**Due: March 14, 11:30 AM**
 
 For this assignment, please complete the _problem set_ found in `hw2-pset.ipynb`. The problem set includes coding
 problems as well as written problems.
