@@ -2,3 +2,4 @@ train_checkpoints_bitfit
 train_checkpoints_no_bitfit
 hw2_backup_202503110334
 checkpoints
+hw2/__pycache__/
