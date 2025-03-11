@@ -16,3 +16,19 @@ According to the original paper and the official BERT Github repository, the BER
 batch sizes = 8, 16, 32, 64, 128  
 learning rates = 3e-4, 1e-4, 5e-5, 3e-5  
 and each combination of hyperparameters were trained for 4 epochs. 
+
+# Problem 3a: Train Models
+| | Validation Accuracy | Learning Rate | Batch Size |
+|---|---|---|---|
+| Without BitFit |0.8878 |3e-4 |128 |
+| With BitFit |0.6330 | 3e-4|8 |
+
+# Problem 3b: Test Models and Report Results
+| | # Trainable Parameters | Test Accuracy |
+|---|---|---|
+| Without BitFit |4386178 | 0.87432|
+| With BitFit |3074 | 0.63416|
+
+1.According to the table above, after we apple bitFit method, the trainable parameters will be reduced by about 99.93%, and test accuracy drops by about 24% in IMDb. Therefore, for BERT_tiny in IMDb task, full fine-tuning performs better than bitFit.  
+2.The results reported by Zaken et al. (2020) shows that bitfit works better in smaller datasets (performs comparably to full fine-tuning), but will noticeable drop accuracy on larger datasets. In Zaken et al's paper, there are large datasets like MNLI(393k) and QQP(364k), and small datasets like RTE(2.5k) and CoLA(8.5k), compared to these datasets, our IMDb (about 50k) could be considered as medium-to-large scale dataset, so the accuracy drop with bitfit align with paper's finding.  
+3.In general, there is not double that bitFit's powerful ability to reduce computational burden is suitable for resource-constrained environments and small-scale datasets, but the accuracy drop compared to full fine-tuning makes it not a quite ideal method if we have high-performance devices and need to deal with larger datasets like IMDb.
