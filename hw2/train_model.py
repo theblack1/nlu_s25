@@ -63,9 +63,9 @@ def init_model(trial: Any, model_name: str, use_bitfit: bool = False) -> \
     # raise NotImplementedError("Problem 2a has not been completed yet!")
     
     # Load a pre-trained BERT classifier model from the Hugging Face Model Hub
-    # model = BertForSequenceClassification.from_pretrained(model_name, num_labels=2)
+    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=2)
     # model = BertForSequenceClassification.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
+    # model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
     
     # If use_bitfit is True, freeze all non-bias parameters
     if use_bitfit:
@@ -123,10 +123,10 @@ def init_trainer(model_name: str, train_data: Dataset, val_data: Dataset,
         per_device_train_batch_size=16,
         per_device_eval_batch_size=16,
         fp16=True,  # Enable mixed precision training (faster and saves memory)
-        # evaluation_strategy="epoch",
-        # save_strategy="epoch",
-        evaluation_strategy="steps", 
-        save_strategy="steps", # 2.save the model obtained during each training run to a folder called `checkpoints`
+        evaluation_strategy="epoch",
+        save_strategy="epoch",
+        # evaluation_strategy="steps", 
+        # save_strategy="steps", # 2.save the model obtained during each training run to a folder called `checkpoints`
         logging_steps=10,
         load_best_model_at_end=True,
         metric_for_best_model="eval_accuracy",
@@ -192,9 +192,14 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
             "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [8, 16, 32, 64, 128]),
         }
     
+    # search_space = {
+    #     "learning_rate": [3e-4, 1e-4, 5e-5, 3e-5],
+    #     "per_device_train_batch_size": [8, 16, 32, 64, 128]
+    # }
+    
     search_space = {
-        "learning_rate": [3e-4, 1e-4, 5e-5, 3e-5],
-        "per_device_train_batch_size": [8, 16, 32, 64, 128]
+        "learning_rate": [3e-4],
+        "per_device_train_batch_size": [8]
     }
     
     def compute_objective(metrics):
@@ -262,13 +267,14 @@ if __name__ == "__main__":  # Use this script to train your model
     trainer_with_bitfit.args.learning_rate = best_with_bitfit.hyperparameters["learning_rate"]
     trainer_with_bitfit.args.per_device_train_batch_size = best_with_bitfit.hyperparameters["per_device_train_batch_size"]
     
-    # read the eval_accuracy
-    val_acc_without_bitfit = trainer_without_bitfit.state.best_metric
-    val_acc_with_bitfit = trainer_with_bitfit.state.best_metric
+    # get validation accuracy
+    val_acc_without_bitfit = trainer_without_bitfit.evaluate()["eval_accuracy"]
+    val_acc_with_bitfit = trainer_with_bitfit.evaluate()["eval_accuracy"]
+    
     
     # save the results
     with open("train_results_without_bitfit.p", "wb") as f:
-        pickle.dump(trainer_without_bitfit, f)
+        pickle.dump(best_without_bitfit, f)
     
     with open("train_results_with_bitfit.p", "wb") as f:
         pickle.dump(best_with_bitfit, f)
