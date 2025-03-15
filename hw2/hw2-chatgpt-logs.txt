@@ -234,3 +234,84 @@ Enable mixed precision training with fp16=True
 Use multiple GPUs with torch.nn.DataParallel or ddp_find_unused_parameters=False
 
 Let me know if you need further clarification!
+
+Q：I have a question, when I am running my Hugging Face model, the train_model.py will create lots of checkpoints，and pick the best one. However, my test_model need to know where is the best checkpoint, what sould I do?
+A：A common approach to solving this issue is to save the best checkpoint's path and then load it during testing. There are a few ways to achieve this:
+
+Solution 1: Use Trainer's best_model_checkpoint attribute
+If you're using Hugging Face’s Trainer API, you can enable save_best_model_at_end=True and retrieve the best checkpoint path as follows:
+
+In train_model.py, ensure you have:
+
+training_args = TrainingArguments(
+    output_dir="./checkpoints",
+    evaluation_strategy="epoch",
+    save_strategy="epoch",
+    save_total_limit=3,  # Limit saved checkpoints to avoid excessive storage use
+    load_best_model_at_end=True,  # Enables best model saving
+    metric_for_best_model="accuracy",  # Choose the right metric
+    greater_is_better=True  # Set accordingly
+)
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=eval_dataset,
+    compute_metrics=compute_metrics
+)
+
+trainer.train()
+print(f"Best model saved at: {trainer.state.best_model_checkpoint}")
+This will store the best model path in trainer.state.best_model_checkpoint.
+
+Save the path to a file, so test_model.py can access it:
+
+with open("best_checkpoint_path.txt", "w") as f:
+    f.write(trainer.state.best_model_checkpoint)
+Solution 2: Manually Pick the Best Checkpoint
+If you are not using Trainer or need manual selection, you can:
+
+List all checkpoint folders (e.g., checkpoints/checkpoint-1000, checkpoints/checkpoint-2000).
+Check their validation metrics (saved in trainer_state.json).
+Pick the best checkpoint and store its path.
+For example:
+
+import os
+import json
+
+checkpoint_dir = "./checkpoints"
+best_checkpoint = None
+best_metric = float("-inf")  # Adjust for your metric direction
+
+for ckpt in os.listdir(checkpoint_dir):
+    state_path = os.path.join(checkpoint_dir, ckpt, "trainer_state.json")
+    if os.path.exists(state_path):
+        with open(state_path) as f:
+            state = json.load(f)
+            current_metric = state["best_metric"]  # Adjust for your metric
+            if current_metric > best_metric:
+                best_metric = current_metric
+                best_checkpoint = os.path.join(checkpoint_dir, ckpt)
+
+with open("best_checkpoint_path.txt", "w") as f:
+    f.write(best_checkpoint)
+
+print(f"Best checkpoint: {best_checkpoint}")
+Solution 3: Load the Best Checkpoint in test_model.py
+Now, in test_model.py, simply read the saved path and load the model:
+
+from transformers import AutoModel
+
+# Read the best checkpoint path
+with open("best_checkpoint_path.txt", "r") as f:
+    best_checkpoint = f.read().strip()
+
+# Load the model from the best checkpoint
+model = AutoModel.from_pretrained(best_checkpoint)
+print(f"Loaded model from {best_checkpoint}")
+Conclusion
+If using Trainer, let it handle checkpoint selection (trainer.state.best_model_checkpoint).
+If selecting manually, extract and store the best checkpoint path.
+Always store the best checkpoint path (best_checkpoint_path.txt) for consistency between training and testing.
+Let me know if you need adjustments

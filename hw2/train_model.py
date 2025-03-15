@@ -192,15 +192,15 @@ def hyperparameter_search_settings() -> Dict[str, Any]:
             "per_device_train_batch_size": trial.suggest_categorical("per_device_train_batch_size", [8, 16, 32, 64, 128]),
         }
     
-    # search_space = {
-    #     "learning_rate": [3e-4, 1e-4, 5e-5, 3e-5],
-    #     "per_device_train_batch_size": [8, 16, 32, 64, 128]
-    # }
-    
     search_space = {
-        "learning_rate": [3e-4],
-        "per_device_train_batch_size": [8]
+        "learning_rate": [3e-4, 1e-4, 5e-5, 3e-5],
+        "per_device_train_batch_size": [8, 16, 32, 64, 128]
     }
+    
+    # search_space = {
+    #     "learning_rate": [3e-4],
+    #     "per_device_train_batch_size": [8]
+    # }
     
     def compute_objective(metrics):
         return metrics["eval_accuracy"]
@@ -256,17 +256,50 @@ if __name__ == "__main__":  # Use this script to train your model
     # print(f"\nTrainable Parameters WITH BitFit: {count_trainable_params(trainer_with_bitfit.model)}")
     # print()
     
-    # hyperparameter search
+    # # hyperparameter search
+    # best_without_bitfit = trainer_without_bitfit.hyperparameter_search(**hyperparameter_search_settings())
+    # best_with_bitfit = trainer_with_bitfit.hyperparameter_search(**hyperparameter_search_settings())
+    
+    # # read the best hyperparameters
+    # trainer_without_bitfit.args.learning_rate = best_without_bitfit.hyperparameters["learning_rate"]
+    # trainer_without_bitfit.args.per_device_train_batch_size = best_without_bitfit.hyperparameters["per_device_train_batch_size"]
+    
+    # trainer_with_bitfit.args.learning_rate = best_with_bitfit.hyperparameters["learning_rate"]
+    # trainer_with_bitfit.args.per_device_train_batch_size = best_with_bitfit.hyperparameters["per_device_train_batch_size"]
+    
+    # # get validation accuracy
+    # val_acc_without_bitfit = trainer_without_bitfit.evaluate()["eval_accuracy"]
+    # val_acc_with_bitfit = trainer_with_bitfit.evaluate()["eval_accuracy"]
+    
+    # Do hyperparameter searching
     best_without_bitfit = trainer_without_bitfit.hyperparameter_search(**hyperparameter_search_settings())
     best_with_bitfit = trainer_with_bitfit.hyperparameter_search(**hyperparameter_search_settings())
+
+    # Print the best hyperparameters
+    print("Best hyperparameters (Without BitFit):", best_without_bitfit.hyperparameters)
+    print("Best hyperparameters (With BitFit):", best_with_bitfit.hyperparameters)
+
+    # reinitialize the Trainer
+    trainer_without_bitfit = init_trainer(model_name, imdb["train"], imdb["val"], use_bitfit=False)
+    trainer_with_bitfit = init_trainer(model_name, imdb["train"], imdb["val"], use_bitfit=True)
+
+    best_lr_without_bitfit = best_without_bitfit.hyperparameters['learning_rate']
+    best_batch_size_without_bitfit = best_without_bitfit.hyperparameters['per_device_train_batch_size']
+
+    best_lr_with_bitfit = best_with_bitfit.hyperparameters['learning_rate']
+    best_batch_size_with_bitfit = best_with_bitfit.hyperparameters['per_device_train_batch_size']
+
+    # set the best hyperparameters
+    trainer_without_bitfit.args.learning_rate = best_lr_without_bitfit
+    trainer_without_bitfit.args.per_device_train_batch_size = best_batch_size_without_bitfit
+
+    trainer_with_bitfit.args.learning_rate = best_lr_with_bitfit
+    trainer_with_bitfit.args.per_device_train_batch_size = best_batch_size_with_bitfit
     
-    # read the best hyperparameters
-    trainer_without_bitfit.args.learning_rate = best_without_bitfit.hyperparameters["learning_rate"]
-    trainer_without_bitfit.args.per_device_train_batch_size = best_without_bitfit.hyperparameters["per_device_train_batch_size"]
-    
-    trainer_with_bitfit.args.learning_rate = best_with_bitfit.hyperparameters["learning_rate"]
-    trainer_with_bitfit.args.per_device_train_batch_size = best_with_bitfit.hyperparameters["per_device_train_batch_size"]
-    
+    # retrain the model with the best hyperparameters
+    trainer_without_bitfit.train()
+    trainer_with_bitfit.train()
+
     # get validation accuracy
     val_acc_without_bitfit = trainer_without_bitfit.evaluate()["eval_accuracy"]
     val_acc_with_bitfit = trainer_with_bitfit.evaluate()["eval_accuracy"]
@@ -279,15 +312,26 @@ if __name__ == "__main__":  # Use this script to train your model
     with open("train_results_with_bitfit.p", "wb") as f:
         pickle.dump(best_with_bitfit, f)
     
+    # # print the results
+    # print("**********************************************************************************")
+    # print(f"Without BitFit - Validation Accuracy: {val_acc_without_bitfit}, "
+    #   f"Learning Rate: {best_without_bitfit.hyperparameters['learning_rate']}, "
+    #   f"Batch Size: {best_without_bitfit.hyperparameters['per_device_train_batch_size']}")
+
+    # print(f"With BitFit - Validation Accuracy: {val_acc_with_bitfit}, "
+    #     f"Learning Rate: {best_with_bitfit.hyperparameters['learning_rate']}, "
+    #     f"Batch Size: {best_with_bitfit.hyperparameters['per_device_train_batch_size']}")
+    # print("**********************************************************************************")
+    
     # print the results
     print("**********************************************************************************")
     print(f"Without BitFit - Validation Accuracy: {val_acc_without_bitfit}, "
-      f"Learning Rate: {best_without_bitfit.hyperparameters['learning_rate']}, "
-      f"Batch Size: {best_without_bitfit.hyperparameters['per_device_train_batch_size']}")
+      f"Learning Rate: {best_lr_without_bitfit}, "
+      f"Batch Size: {best_batch_size_without_bitfit}")
 
     print(f"With BitFit - Validation Accuracy: {val_acc_with_bitfit}, "
-        f"Learning Rate: {best_with_bitfit.hyperparameters['learning_rate']}, "
-        f"Batch Size: {best_with_bitfit.hyperparameters['per_device_train_batch_size']}")
+        f"Learning Rate: {best_lr_with_bitfit}, "
+        f"Batch Size: {best_batch_size_with_bitfit}")
     print("**********************************************************************************")
     
     # save the best checkpoint

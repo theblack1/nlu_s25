@@ -73,42 +73,42 @@ def init_tester(directory: str) -> Trainer:
     
     return tester
 
-# auto find the best checkpoint based on `eval_accuracy`
-def get_best_checkpoint_from_logs(directory):
-    """
-    递归遍历 `directory` 及其子目录，找到 `eval_accuracy` 最高的 checkpoint。
+# # auto find the best checkpoint based on `eval_accuracy`
+# def get_best_checkpoint_from_logs(directory):
+#     """
+#     递归遍历 `directory` 及其子目录，找到 `eval_accuracy` 最高的 checkpoint。
     
-    :param directory: 训练 checkpoints 目录，例如 "./train_checkpoints_no_bitfit"
-    :return: (最佳 checkpoint 路径, 最佳 eval_accuracy)
-    """
-    best_checkpoint = None
-    best_accuracy = 0.0
-    best_step = 0
+#     :param directory: 训练 checkpoints 目录，例如 "./train_checkpoints_no_bitfit"
+#     :return: (最佳 checkpoint 路径, 最佳 eval_accuracy)
+#     """
+#     best_checkpoint = None
+#     best_accuracy = 0.0
+#     best_step = 0
     
-    # traverse the directory and all subdirectories
-    for root, _, files in os.walk(directory):
-        if "trainer_state.json" in files:
-            trainer_state_path = os.path.join(root, "trainer_state.json")
+#     # traverse the directory and all subdirectories
+#     for root, _, files in os.walk(directory):
+#         if "trainer_state.json" in files:
+#             trainer_state_path = os.path.join(root, "trainer_state.json")
 
-            # read the trainer_state.json
-            with open(trainer_state_path, "r") as f:
-                trainer_state = json.load(f)
+#             # read the trainer_state.json
+#             with open(trainer_state_path, "r") as f:
+#                 trainer_state = json.load(f)
 
-            # traverse log_history to find the highest eval_accuracy step
-            for log in trainer_state.get("log_history", []):
-                if "eval_accuracy" in log:  # ensure that there is an eval_accuracy record
-                    accuracy = log["eval_accuracy"]
-                    step = log["step"]
+#             # traverse log_history to find the highest eval_accuracy step
+#             for log in trainer_state.get("log_history", []):
+#                 if "eval_accuracy" in log:  # ensure that there is an eval_accuracy record
+#                     accuracy = log["eval_accuracy"]
+#                     step = log["step"]
 
-                    if accuracy > best_accuracy:
-                        best_accuracy = accuracy
-                        best_step = step
-                        best_checkpoint = root
+#                     if accuracy > best_accuracy:
+#                         best_accuracy = accuracy
+#                         best_step = step
+#                         best_checkpoint = root
 
-    print(f"Best checkpoint in {directory}: {best_checkpoint}, Best eval_accuracy: {best_accuracy}, Best step: {best_step}")
-    print()
+#     print(f"Best checkpoint in {directory}: {best_checkpoint}, Best eval_accuracy: {best_accuracy}, Best step: {best_step}")
+#     print()
     
-    return best_checkpoint
+#     return best_checkpoint
 
 
 if __name__ == "__main__":  # Use this script to test your model
@@ -132,8 +132,8 @@ if __name__ == "__main__":  # Use this script to test your model
     #     pickle.dump(results, f)
 
     # find the best checkpoint
-    best_checkpoint_no_bitfit = get_best_checkpoint_from_logs("./train_checkpoints_no_bitfit")    
-    best_checkpoint_bitfit = get_best_checkpoint_from_logs("./train_checkpoints_bitfit")
+    best_checkpoint_no_bitfit = "checkpoints/best_model_without_bitfit"
+    best_checkpoint_bitfit = "checkpoints/best_model_with_bitfit"
     
     # test WITHOUT BitFit
     tester_without_bitfit = init_tester(best_checkpoint_no_bitfit)
