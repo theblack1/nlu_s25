@@ -86,7 +86,3 @@ For written problems, you will receive:
 * 0 points if your answer is blank.
 
 Partial credit may be awarded at the graders' discretion.
-
-## Late Submissions and Resubmissions
-
-Grading will commence on April 3, 2023, and solutions will be released on that day. Therefore, no late submissions will be accepted after 9:30 AM on April 3. You may resubmit your solutions as many times as you like; only the final submission will be graded. If the final submission occurs after the deadline on March 27, then your submission will be considered late even if you have previously submitted your solution before the deadline.
