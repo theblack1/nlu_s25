@@ -165,7 +165,24 @@ class MultipleChoicePipeline(Pipeline):
                 text 5 corresponds to answer choice 1 for question 1,
                 etc.
         """
-        raise NotImplementedError("Problem 2c has not been completed yet!")
+        # raise NotImplementedError("Problem 2c has not been completed yet!")
+        # batch: dictionary of lists
+        # each dictionary has keys: question list, choices list, label list
+        # question: str
+        # choices: list of 4 choices
+        # label: int, the correct choice
+        input_texts = []
+        demonstrations_text = self.demonstrations + "\n\n" if self.demonstrations is not None else ""
+        system_prompt_text = self._system_prompt if self._system_prompt is not None else ""
+        
+        for q_idx, question_text in enumerate(batch["question"]):
+            choices_list = batch["choices"][q_idx]
+            for choice_text in choices_list:
+                # concatenate prompt, question, and choice
+                input_text = f"{demonstrations_text}Q:{question_text}\nA:{system_prompt_text}{choice_text}"
+                input_texts.append(input_text)
+        
+        return input_texts
 
     def preprocess(self, batch: Dict[str, Any]) -> Dict[str, torch.Tensor]:
         """
