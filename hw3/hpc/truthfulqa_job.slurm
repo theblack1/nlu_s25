@@ -11,12 +11,14 @@
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=truthfulqa
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=your_email_address@nyu.edu
+#SBATCH --mail-user=fl2656@nyu.edu
 #SBATCH --output="truthfulqa.out"
 
 
 module purge
-cd path/to/your/code
+# cd path/to/your/code
+cd home/fl2656/nlu_s25/hw3
+# OVERLAY_FILE=path/to/your/singularity/overlay/file
 OVERLAY_FILE=path/to/your/singularity/overlay/file
 SINGULARITY_IMAGE=path/to/your/singularity/image/file
 singularity exec --nv \

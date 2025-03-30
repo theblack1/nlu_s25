@@ -87,10 +87,17 @@ class MultipleChoicePipeline(Pipeline):
         if tokenizer.pad_token is None:  # GPT-2 doesn't have a pad token
             tokenizer.pad_token = tokenizer.eos_token
 
-        # Use GPU if it's available
-        device = 0 if torch.cuda.is_available() else None
-        super().__init__(lm, tokenizer, device=device)
+        # # Use GPU if it's available
+        # device = 0 if torch.cuda.is_available() else None
+        # super().__init__(lm, tokenizer, device=device)
+        # self.model.to(self.device)
+        
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        super().__init__(lm, tokenizer, device=0 if torch.cuda.is_available() else -1)
         self.model.to(self.device)
+
+        # 检查模型是否在 GPU 上
+        print("Model is using device:", self.device)
 
         # Initialize loss function (make it ignore pad tokens). Note the
         # use of the reduction="none" keyword argument.
@@ -225,6 +232,7 @@ class MultipleChoicePipeline(Pipeline):
             as well as the input_ids tensor from input_
         """
         # raise NotImplementedError("Problem 2d has not been completed yet!")
+        # print("Running _forward() on device:", self.device)
         input_ids = input_["input_ids"]
         logit_output = self.model(input_ids=input_ids, attention_mask=input_["attention_mask"]).logits
         

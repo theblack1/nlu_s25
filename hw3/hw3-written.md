@@ -33,3 +33,12 @@ MC1 and text classification tasks are difference in these ways:
  1. Input: in MC1, the input is a question and multiple choices. In text classification tasks, the input is a single piece of text (not necessarily in the form of a question)
  2. Output: in MC1, the output is the most likely answer from given choices. And the choices are different for each single questions. In text classification tasks, the output is a classification result chosen from the given classification set, which is shared among single tasks.
  3. Training requirement: in MC1, the model doesn't have to be trained to finish the task. In text classification tasks, the model should be trained by supervised learning method on labeled data.
+
+# Problem 3a: Scaling Laws
+| # of Parameters | Accuracy |
+|-----------------|----------|
+| 125M            |   0.263       |
+| 350M            |   0.254       |
+| 1.3B            |   0.263       |
+| 2.7B            |          |
+| 6.7B            |          |
