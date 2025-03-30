@@ -18,6 +18,7 @@ import torch.nn as nn
 from datasets import load_dataset, Dataset
 from tqdm import tqdm
 from transformers import Pipeline, AutoModelForCausalLM, AutoTokenizer
+from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer
 
 """ Helper functions """
 
@@ -80,10 +81,25 @@ class MultipleChoicePipeline(Pipeline):
         self.num_choices = num_choices
 
         # Load the LLM and tokenizer
-        lm = AutoModelForCausalLM.from_pretrained(model)
-        lm.eval()
+        # lm = AutoModelForCausalLM.from_pretrained(model)
+        # lm.eval()
+
+        # tokenizer = AutoTokenizer.from_pretrained(model)
+        # 设置量化配置
+        bnb_config = BitsAndBytesConfig(
+            load_in_8bit=True,
+            llm_int8_threshold=6.0
+        )
 
         tokenizer = AutoTokenizer.from_pretrained(model)
+
+        lm = AutoModelForCausalLM.from_pretrained(
+            model,
+            device_map="auto",
+            quantization_config=bnb_config
+        )
+        lm.eval()  # Set the model to evaluation mode
+        
         if tokenizer.pad_token is None:  # GPT-2 doesn't have a pad token
             tokenizer.pad_token = tokenizer.eos_token
 

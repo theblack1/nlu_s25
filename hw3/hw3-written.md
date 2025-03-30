@@ -40,5 +40,5 @@ MC1 and text classification tasks are difference in these ways:
 | 125M            |   0.263       |
 | 350M            |   0.254       |
 | 1.3B            |   0.263       |
-| 2.7B            |          |
+| 2.7B            |   0.254       |
 | 6.7B            |          |
