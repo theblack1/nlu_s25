@@ -172,14 +172,16 @@ class MultipleChoicePipeline(Pipeline):
         # choices: list of 4 choices
         # label: int, the correct choice
         input_texts = []
-        demonstrations_text = self.demonstrations + "\n\n" if self.demonstrations is not None else ""
-        system_prompt_text = self._system_prompt if self._system_prompt is not None else ""
+        # demonstrations_text = self.demonstrations + "\n\n" if self.demonstrations is not "" else ""
+        # system_prompt_text = " " + self._system_prompt if self._system_prompt is not "" else ""
+        # print(f"demonstrations_text: '{demonstrations_text}'")
+        # print(f"system_prompt_text: '{system_prompt_text}'")
         
         for q_idx, question_text in enumerate(batch["question"]):
             choices_list = batch["choices"][q_idx]
             for choice_text in choices_list:
                 # concatenate prompt, question, and choice
-                input_text = f"{demonstrations_text}Q:{question_text}\nA:{system_prompt_text}{choice_text}"
+                input_text = f"{self._demos}Q: {question_text}\nA:{self._system_prompt} {choice_text}"
                 input_texts.append(input_text)
         
         return input_texts
@@ -200,7 +202,14 @@ class MultipleChoicePipeline(Pipeline):
             These tensors should be stored on the GPU if it is being
             used; otherwise, they should be stored on the CPU
         """
-        raise NotImplementedError("Problem 2d has not been completed yet!")
+        # raise NotImplementedError("Problem 2d has not been completed yet!")
+        input_texts = self._get_input_texts(batch)
+        # inout_texts: list of "Q: question\nA: choice"
+        # encode the input_texts
+        encode_input = self.tokenizer(input_texts, return_tensors="pt", padding=True, truncation=True).to(self.device)
+        
+        return encode_input
+        
 
     def _forward(self, input_: Dict[str, torch.Tensor]) -> \
             Dict[str, torch.Tensor]:
@@ -215,7 +224,12 @@ class MultipleChoicePipeline(Pipeline):
         :return: The logit scores assigned to each next-token prediction
             as well as the input_ids tensor from input_
         """
-        raise NotImplementedError("Problem 2d has not been completed yet!")
+        # raise NotImplementedError("Problem 2d has not been completed yet!")
+        input_ids = input_["input_ids"]
+        logit_output = self.model(input_ids=input_ids, attention_mask=input_["attention_mask"]).logits
+        
+        return {"input_ids": input_ids, "logits": logit_output}
+        
 
     def postprocess(self, outputs: Dict[str, torch.Tensor]) -> Output:
         """
@@ -236,7 +250,34 @@ class MultipleChoicePipeline(Pipeline):
             responds to question i and column j corresponds to answer
             choice j
         """
-        raise NotImplementedError("Problem 2d has not been completed yet!")
+        # raise NotImplementedError("Problem 2d has not been completed yet!")
+        input_ids = outputs["input_ids"]  # (N, L)
+        logits = outputs["logits"]        # (N, L, V)
+        
+        # Shift logits and input_ids so we predict token i+1 given token i
+        shift_logits = logits[:, :-1, :].contiguous()
+        shift_labels = input_ids[:, 1:].contiguous()
+        
+        # Flatten for loss computation
+        loss = self.loss_fn(
+            shift_logits.view(-1, shift_logits.size(-1)),
+            shift_labels.view(-1)
+        )  # shape: (N * (L - 1),)
+
+        # Reshape to (N, L-1) and compute sum loss per sample
+        loss = loss.view(input_ids.size(0), -1).sum(dim=1)  # (N,)
+
+        # Now reshape to (num_questions, num_choices)
+        num_choices = self.num_choices
+        loss_matrix = loss.view(-1, num_choices)  # (Q, C)
+
+        # Find index of min loss per row (i.e. per question)
+        prediction = torch.argmin(loss_matrix, dim=1)  # (Q,)
+
+        return Output(
+            loss=loss_matrix.detach().cpu().numpy(),
+            prediction=prediction.detach().cpu().numpy()
+        )
 
 
 def run_model(pipeline: MultipleChoicePipeline, dataset: Dataset,
