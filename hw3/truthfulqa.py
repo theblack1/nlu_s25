@@ -109,8 +109,9 @@ class MultipleChoicePipeline(Pipeline):
         # self.model.to(self.device)
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        super().__init__(lm, tokenizer, device=0 if torch.cuda.is_available() else -1)
-        self.model.to(self.device)
+        # super().__init__(lm, tokenizer, device=0 if torch.cuda.is_available() else -1)
+        # self.model.to(self.device)
+        super().__init__(lm, tokenizer)
 
         # 检查模型是否在 GPU 上
         print("Model is using device:", self.device)
