@@ -1,6 +1,6 @@
 Name: Feifan Liao  
-ID:fl2656
-Work with：Zhimei Chen
+ID:fl2656  
+Work with：Zhimei Chen, Xintong Huang
 
 # Problem 1a: Understand the Experimental Setup
 Answer:  
@@ -41,4 +41,18 @@ MC1 and text classification tasks are difference in these ways:
 | 350M            |   0.254       |
 | 1.3B            |   0.263       |
 | 2.7B            |   0.254       |
-| 6.7B            |          |
+| 6.7B            |   0.230       |
+## Does OPT exhibit inverse scaling on TruthfulQA, similar to the results presented in the paper?
+Yes, OPT does exhibit inverse scaling on the TruthfulQA benchmark. As shown in our accuracy table, larger models (such as OPT-2.7B and OPT-6.7B) do not consistently outperform smaller ones (e.g., OPT-125M or OPT-1.3B). In fact, the accuracy decreases as model size increases beyond 1.3B. This matches the findings in the original OPT paper, where larger language models were shown to generate more plausible but incorrect answers. Therefore, the phenomenon of inverse scaling is confirmed in our evaluation.
+
+# Problem 3b: Prompt Engineering
+| Prompts               | Accuracy |
+|-----------------------|----------|
+| None (Zero-Shot)      |  0.234        |
+| Demos Only            |  0.263        |
+| System Prompt Only    |  0.263        |
+| Demos + System Prompt |  0.297        |
+## Among the four options tried, which prompting style best alleviates susceptibility to imitative falsehoods?
+The combination of demonstrations and system prompt achieves the highest accuracy of 0.297 (compared to 0.263 and 0.234).
+## Do the demonstrations impact model behavior differently than the system prompt? If so, what accounts for this difference?
+Yes, they influence model behavior in complementary ways. Demonstrations provide the model with a pattern of how truthful answers should look, guiding its generation based on prior examples (Demos Only achieves 0.263 > Zero-Shot 0.234). And the system prompt ("Actually") guide the model's way of thinking, encouraging it to be more cautious and fact-based (System Prompt Only achieves 0.263 > Zero-Shot 0.234). When they are combined together, their benfits will be added (Demos + System Prompt achieves 0.297, which is better than use them alone)

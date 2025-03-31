@@ -18,7 +18,7 @@ import torch.nn as nn
 from datasets import load_dataset, Dataset
 from tqdm import tqdm
 from transformers import Pipeline, AutoModelForCausalLM, AutoTokenizer
-from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer
+# from transformers import BitsAndBytesConfig, AutoModelForCausalLM, AutoTokenizer
 
 """ Helper functions """
 
@@ -81,37 +81,37 @@ class MultipleChoicePipeline(Pipeline):
         self.num_choices = num_choices
 
         # Load the LLM and tokenizer
-        # lm = AutoModelForCausalLM.from_pretrained(model)
-        # lm.eval()
-
-        # tokenizer = AutoTokenizer.from_pretrained(model)
-        # 设置量化配置
-        bnb_config = BitsAndBytesConfig(
-            load_in_8bit=True,
-            llm_int8_threshold=6.0
-        )
+        lm = AutoModelForCausalLM.from_pretrained(model)
+        lm.eval()
 
         tokenizer = AutoTokenizer.from_pretrained(model)
+        
+        # bnb_config = BitsAndBytesConfig(
+        #     load_in_8bit=True,
+        #     llm_int8_threshold=6.0
+        # )
 
-        lm = AutoModelForCausalLM.from_pretrained(
-            model,
-            device_map="auto",
-            quantization_config=bnb_config
-        )
-        lm.eval()  # Set the model to evaluation mode
+        # tokenizer = AutoTokenizer.from_pretrained(model)
+
+        # lm = AutoModelForCausalLM.from_pretrained(
+        #     model,
+        #     device_map="auto",
+        #     quantization_config=bnb_config
+        # )
+        # lm.eval()  # Set the model to evaluation mode
         
         if tokenizer.pad_token is None:  # GPT-2 doesn't have a pad token
             tokenizer.pad_token = tokenizer.eos_token
 
-        # # Use GPU if it's available
-        # device = 0 if torch.cuda.is_available() else None
-        # super().__init__(lm, tokenizer, device=device)
-        # self.model.to(self.device)
+        # Use GPU if it's available
+        device = 0 if torch.cuda.is_available() else None
+        super().__init__(lm, tokenizer, device=device)
+        self.model.to(self.device)
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # super().__init__(lm, tokenizer, device=0 if torch.cuda.is_available() else -1)
-        # self.model.to(self.device)
-        super().__init__(lm, tokenizer)
+        super().__init__(lm, tokenizer, device=0 if torch.cuda.is_available() else -1)
+        self.model.to(self.device)
+        # super().__init__(lm, tokenizer)
 
         # 检查模型是否在 GPU 上
         print("Model is using device:", self.device)
