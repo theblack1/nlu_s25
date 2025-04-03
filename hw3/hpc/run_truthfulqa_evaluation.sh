@@ -1,12 +1,10 @@
 # Add all your Python calls here:
-# python truthfulqa.py facebook/opt-125m
-# python truthfulqa.py facebook/opt-350m
-# python truthfulqa.py facebook/opt-1.3B
-# python truthfulqa.py facebook/opt-2.7B
-# python truthfulqa.py facebook/opt-6.7B --batch-size 1
-python /home/fl2656/nlu_s25/hw3/truthfulqa.py facebook/opt-125m
-python /home/fl2656/nlu_s25/hw3/truthfulqa.py facebook/opt-350m
-python /home/fl2656/nlu_s25/hw3/truthfulqa.py facebook/opt-1.3B
-python /home/fl2656/nlu_s25/hw3/truthfulqa.py facebook/opt-2.7B
-python /home/fl2656/nlu_s25/hw3/truthfulqa.py facebook/opt-6.7B
+python truthfulqa.py facebook/opt-125m
+python truthfulqa.py facebook/opt-350m
+python truthfulqa.py facebook/opt-1.3b
+python truthfulqa.py facebook/opt-2.7b
+python truthfulqa.py facebook/opt-6.7b
+python truthfulqa.py facebook/opt-1.3b --system-prompt 'Actually,'
+python truthfulqa.py facebook/opt-1.3b --no-demos
+python truthfulqa.py facebook/opt-1.3b --no-demos --system-prompt 'Actually,'
 # ... etc.
